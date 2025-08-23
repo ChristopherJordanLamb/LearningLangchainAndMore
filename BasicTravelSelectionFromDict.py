@@ -54,7 +54,7 @@ def getHotels(inp: str) -> str:
         return "No hotels found for this city."
 findHotels = Tool( 
     name="findHotels",
-    description="Returns a list of hotels in the specified city. Call with 'findHotels in <city>'",
+    description="Returns a list of hotels in the specified city. Call with 'findHotels <city>'",
     func=getHotels)
 
 wrapped_model = GPT4AllLangChain("Meta-Llama-3-8B-Instruct.Q4_0.gguf", device="gpu")
