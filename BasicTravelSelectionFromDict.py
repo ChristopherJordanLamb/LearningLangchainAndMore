@@ -40,41 +40,63 @@ hotels = {
     "New York": ["Hotel D", "Hotel E", "Hotel F"],
     "Tokyo": ["Hotel G", "Hotel H", "Hotel I"]
 }
-
+hotel_descriptions = {
+    "Hotel A": "A budget-friendly hotel with basic amenities.",
+    "Hotel B": "A mid-range hotel with comfortable rooms and free breakfast.",
+    "Hotel C": "A luxury hotel with a spa and fine dining.",
+    "Hotel D": "A budget hotel located in the heart of the city.",
+    "Hotel E": "A boutique hotel with unique decor and personalized service.",
+    "Hotel F": "A family-friendly hotel with a pool and play area.",
+    "Hotel G": "A modern hotel with stunning views of the city skyline.",
+    "Hotel H": "An eco-friendly hotel with sustainable practices.",
+    "Hotel I": "A traditional hotel with a rich history."
+}
 def getHotels(inp: str) -> str:
     print(f"[DEBUG] Tool received input: '{inp}'")
     city = inp.split(" in ")[-1] if " in " in inp else inp
-    print(f"[DEBUG] Extracted city: {city}")
-
+    city = city.strip("'\" ")
     if city in hotels:
-        hotel_list = hotels[city]
+        hotel_list = {"hotels": hotels[city]} 
         print(f"[DEBUG] Found hotels: {hotel_list}")
-        return ", ".join(hotel_list)
+        return hotel_list
     else:
         return "No hotels found for this city."
 findHotels = Tool( 
     name="findHotels",
-    description="Returns a list of hotels in the specified city. Call with 'findHotels <city>'",
+    description="Returns a list of hotels in the given city. Call with 'findHotels <city>'",
     func=getHotels)
 
+def GetHotelDescription(hotelName: str) -> str:
+    hotelName = hotelName.strip("'\" ")
+    print(f"[DEBUG] Tool received input: '{hotelName}'")
+    description = hotel_descriptions.get(hotelName, "No description available for this hotel.")
+    print(f"[DEBUG] Description: {description}")
+    return description
+describeHotels = Tool(
+    name="describeHotels",
+    description="Returns a description of a given hotel name, you don't need the city, just the name. It can only handle one hotel at once. Call with 'describeHotels <hotel_name>'.",
+    func=GetHotelDescription
+)
 wrapped_model = GPT4AllLangChain("Meta-Llama-3-8B-Instruct.Q4_0.gguf", device="gpu")
 
 # Simpler agent setup
 agent = initialize_agent(
-    [findHotels], 
-    wrapped_model, 
-    agent_type="conversational-react-description",
+    [findHotels, describeHotels],
+    wrapped_model,
+    agent_type="zero-shot-react-description",
     verbose=True,
-    max_iterations=2,
+    max_iterations=8,
     agent_kwargs={
-        "prefix": "You are a calculator assistant. If you have a tool fits a problem, use it. otherwise, Make your own choice. Tools are called with 'Toolname' not with '[Toolname]'. once you decide on a result, return it immediately. "
+        "prefix": "You are a travel assistant. Use the tools when needed, otherwise answer directly."
     }
 )
 
 print("=== TESTING ===")
-result = agent.run("please get me some hotels in Paris")
+hotel_options = agent.run("please get me the name of some hotels in Paris")
+print(hotel_options)
+result = agent.run(f"give a short description of each of these hotel names: {str(hotel_options)}")
 print(f"\n=== FINAL RESULT: {result} ===")
 
 # Also test the tool directly
-direct_result = findHotels("findHotels in Paris")
+direct_result = describeHotels("Hotel A")
 print(f"Direct tool result: {direct_result}")
