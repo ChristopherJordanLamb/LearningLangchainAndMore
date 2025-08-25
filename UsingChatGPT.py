@@ -9,6 +9,8 @@ import json
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import ToolMessage
 from langchain.tools import tool
+
+from AmadeusCall import searchHotels
 class BasicToolNode:
     """A node that runs the tools requested in the last AIMessage."""
 
@@ -51,29 +53,36 @@ hotel_descriptions = {
     "Hotel H": "An eco-friendly hotel with sustainable practices.",
     "Hotel I": "A traditional hotel with a rich history."
 }
+# @tool
+# def findHotelsByCity(city: str) -> str:
+#     """Returns a list of hotels
+#     Args:
+#         city (str): The name of the city to find hotels in.
+#     """
+#     city = city.strip("'\" ")
+#     if city in hotels:
+#         return ", ".join(hotels[city])
+#     return "No hotels found."
 @tool
-def findHotels(city: str) -> str:
-    """Returns a list of hotels
+def FindHotelsByCoords(coords: list, radius: int) -> str:
+    """Returns a list of hotels - ID is used for future functions using the hotel, not to be returned to user. 
     Args:
-        city (str): The name of the city to find hotels in.
+        coords (list): The Coordinates of the location, in the format [latitude, longitude].
+        radius (int): The radius (in km) to search for hotels.
     """
-    city = city.strip("'\" ")
-    if city in hotels:
-        return ", ".join(hotels[city])
-    return "No hotels found."
+    latitude, longitude = coords
+    return searchHotels(latitude, longitude, radius)
 
 @tool
-def DescribeHotel(hotel_name: str) -> str:
+def DescribeHotel(hotel_ID: str) -> str:
     """Returns a description of a hotel
     Args:
-        hotel_name (str): The name of the hotel to describe.
+        hotel_ID (str): The ID of the hotel to describe.
     """
-    hotel_name = hotel_name.strip("'\" ")
-    if hotel_name in hotel_descriptions:
-        return hotel_descriptions[hotel_name]
-    return "No description found."
-
-tools = [findHotels, DescribeHotel]
+    #  had this working on local data - but trying to figure out how to transfer hotelID to amadeus hotelID for the API. 
+    return "Hotel description not available."
+# tools = [findHotelsByCity, FindHotelsByCoords, DescribeHotel]
+tools = [FindHotelsByCoords, DescribeHotel]
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
@@ -134,7 +143,6 @@ from IPython.display import Image, display
 try:
     display(Image(graph.get_graph().draw_ascii()))
 except Exception:
-    # This requires some extra dependencies and is optional
     pass
 
 def stream_graph_updates(user_input: str):

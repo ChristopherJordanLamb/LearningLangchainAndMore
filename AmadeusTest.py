@@ -23,13 +23,17 @@ auth_response.raise_for_status()
 access_token = auth_response.json()["access_token"]
 print("Access token obtained:", access_token)
 
-# Test request
-search_url = "https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city"
+# # Test request
+# search_url = "https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city"
 headers = {"Authorization": f"Bearer {access_token}"}
 
+# Example for a specific location in Paris (e.g., near the Louvre)
+search_url = "https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-geocode"
+
 params = {
-    "cityCode": "PAR",
-    "radius": 1,
+    "latitude": 35.6938,   # Louvre Museum coordinates
+    "longitude": 139.7034,
+    "radius": 1,# 1 km
     "radiusUnit": "KM",
     "hotelSource": "ALL"
 }

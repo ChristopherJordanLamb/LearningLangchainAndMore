@@ -45,7 +45,7 @@ def GetSumPlus1(inp: str) -> str:
         float_numbers = [float(n) for n in numbers]
         result = 1 + sum(float_numbers)
         print(f"[DEBUG] Calculation: 1 + {' + '.join(map(str, float_numbers))} = {result}")
-        return str(result)  # Return just the number
+        return str(result)
     else:
         return "Need at least 2 numbers"
 
@@ -64,7 +64,7 @@ def Multiply(inp: str) -> str:
         res = 1
         for i in float_numbers:
             res*=i
-        return str(res)  # Return just the number
+        return str(res)
     else:
         return "Need at least 2 numbers"
 
@@ -75,8 +75,6 @@ multiply = Tool(
 )
 
 wrapped_model = GPT4AllLangChain("Meta-Llama-3-8B-Instruct.Q4_0.gguf", device="gpu")
-
-# Simpler agent setup
 agent = initialize_agent(
     [sumPlus1, multiply], 
     wrapped_model, 
@@ -92,7 +90,6 @@ print("=== TESTING ===")
 result = agent.run("what is 5615 multiplied by 576")
 print(f"\n=== FINAL RESULT: {result} ===")
 
-# Also test the tool directly
 print("\n=== DIRECT TOOL TEST ===")
 direct_result = GetSumPlus1("11.521, 2")
 print(f"Direct tool result: {direct_result}")
